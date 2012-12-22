@@ -1,12 +1,17 @@
 package main
 
 import (
-    "code.google.com/p/oauth2"
+    "code.google.com/p/goauth2/oauth"
+	"github.com/heroku/heroku.go"
+	"github.com/gorilla/sessions"
+	"html"
 	"os"
-    "http"
+    "net/http"
 )
 
-var oauthCfg = &oauth.Config {
+var store = sessions.NewCookieStore([]byte(os.Getenv("COOKIE_SECRET")))
+
+var oauthConfig = &oauth.Config {
 	ClientId: os.Getenv("HEROKU_ID"),
 	ClientSecret: os.Getenv("HEROKU_SECRET"),
 	AuthURL: "https://api.heroku.com/oauth/authorize",
@@ -16,8 +21,8 @@ var oauthCfg = &oauth.Config {
 
 func main() {
     http.HandleFunc("/", handleRoot)
-    http.HandleFunc("/heroku/auth", handleAuth)
-    http.HandleFunc("/heroku/auth/callback", handleAuthCallback)
+    http.HandleFunc("/auth/heroku", handleAuth)
+    http.HandleFunc("/auth/heroku/callback", handleAuthCallback)
 	http.HandleFunc("/user", handleUser)
     http.ListenAndServe(":5000", nil)
 }
@@ -27,32 +32,41 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(body))
 }
 
-func handleAuthorize(w http.ResponseWriter, r *http.Request) {
-    //Get the Google URL which shows the Authentication page to the user
-    url := oauthCfg.AuthCodeURL("")
-
-    //redirect user to that page
-    http.Redirect(w, r, "url", http.StatusFound)
+func handleAuth(w http.ResponseWriter, r *http.Request) {
+    url := oauthConfig.AuthCodeURL("")
+    http.Redirect(w, r, url, http.StatusFound)
 }
 
-// Function that handles the callback from the Google server
-func handleOAuth2Callback(w http.ResponseWriter, r *http.Request) {
-    //Get the code from the response
+func handleAuthCallback(w http.ResponseWriter, r *http.Request) {
     code := r.FormValue("code")
-
-    t := &oauth.Transport{oauth.Config: oauthCfg}
-
-    // Exchange the received code for a token
-    t.Exchange(code)
-
-    //now get user data based on the Transport which has the token
-    resp, _ := t.Client().Get(profileInfoURL)
-
-    buf := make([]byte, 1024)
-    resp.Body.Read(buf)
-    userInfoTemplate.Execute(w, string(buf))
+    transport := &oauth.Transport{oauth.Config: oauthConfig}
+    token, err := transport.Exchange(code)
+	if err != nil {
+		panic(err)
+	}
+	session, err := store.Get(r, "heroku-oauth-example-go")
+	if err != nil {
+		panic(err)
+	}
+	session.Values["heroku-oauth-token"] = token.AccessToken
+	session.Save(r, w)
+	http.Redirect(w, r, "/user", http.StatusFound)
 }
 
 func handleUser(w http.ResponseWriter, r *http.Request) {
-	
+	session, err := store.Get(r, "heroku-oauth-example-go")
+	if err != nil {
+		panic(err)
+	}
+	herokuOauthToken := session.Values["heroku-oauth-token"].(string)
+	client, err := heroku.New("https://:" + herokuOauthToken + "@api.heroku.com")
+	if err != nil {
+		panic(err)
+	}
+	account, err := client.AccountInfo()
+	if err != nil {
+		panic(err)
+	}
+	body := "Hi " + html.EscapeString(account.Email)
+	w.Write([]byte(body))
 }
