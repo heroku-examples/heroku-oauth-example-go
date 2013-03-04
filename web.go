@@ -12,8 +12,8 @@ import (
 var store = sessions.NewCookieStore([]byte(os.Getenv("COOKIE_SECRET")))
 
 var oauthConfig = &oauth.Config {
-	ClientId: os.Getenv("HEROKU_ID"),
-	ClientSecret: os.Getenv("HEROKU_SECRET"),
+	ClientId: os.Getenv("HEROKU_OAUTH_ID"),
+	ClientSecret: os.Getenv("HEROKU_OAUTH_SECRET"),
 	AuthURL: "https://api.heroku.com/oauth/authorize",
 	TokenURL: "https://api.heroku.com/oauth/token",
 	RedirectURL: "http://localhost:5000/heroku/auth/callback",
