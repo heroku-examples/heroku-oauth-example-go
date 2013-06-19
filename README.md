@@ -1,16 +1,20 @@
 # Heroku OAuth Example: Go
 
-Example Go application using OAuth against the Heroku API.
+Example Go application using OAuth to authorize user with the Heroku API.
 
 ## Usage
 
-First, acquire a `localhost:5000` OAuth key/secret pair from the API team. Then:
+First, create an OAuth client on Heroku. The easiest way to do this is from your account page on [Heroku Dashboard](https://dashboard.heroku.com/account). When prompted for a callback URL, use `http://localhost:5000/auth/heroku/callback`.
+
+The [OAuth developer documentation](https://devcenter.heroku.com/articles/oauth) has additional resources.
+
+When you create the OAuth client, you get get an id and secret. Register these in your apps environment and start the app:
 
 ```
 $ cat > .env <<EOF
 HEROKU_OAUTH_ID=...
 HEROKU_OAUTH_SECRET=...
-COOKIE_SECRET=...
+COOKIE_SECRET=change_me
 EOF
 $ go get
 $ foreman start
