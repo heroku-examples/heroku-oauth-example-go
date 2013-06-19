@@ -2,20 +2,26 @@ package main
 
 import (
     "code.google.com/p/goauth2/oauth"
-	"github.com/heroku/heroku.go"
+	"encoding/json"
 	"github.com/gorilla/sessions"
 	"html"
+	"io/ioutil"
 	"os"
     "net/http"
 )
+
+// Account representation.
+type Account struct {
+	Email string `json:"email"`
+}
 
 var store = sessions.NewCookieStore([]byte(os.Getenv("COOKIE_SECRET")))
 
 var oauthConfig = &oauth.Config {
 	ClientId: os.Getenv("HEROKU_OAUTH_ID"),
 	ClientSecret: os.Getenv("HEROKU_OAUTH_SECRET"),
-	AuthURL: "https://api.heroku.com/oauth/authorize",
-	TokenURL: "https://api.heroku.com/oauth/token",
+	AuthURL: "https://id.heroku.com/oauth/authorize",
+	TokenURL: "https://id.heroku.com/oauth/token",
 	RedirectURL: "http://localhost:5000/heroku/auth/callback",
 }
 
@@ -59,14 +65,16 @@ func handleUser(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	herokuOauthToken := session.Values["heroku-oauth-token"].(string)
-	client, err := heroku.New("https://:" + herokuOauthToken + "@api.heroku.com")
-	if err != nil {
-		panic(err)
-	}
-	account, err := client.AccountInfo()
-	if err != nil {
-		panic(err)
-	}
+    resp, err := http.Get("https://:" + herokuOauthToken + "@api.heroku.com/account")
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+    responseBody, err := ioutil.ReadAll(resp.Body)
+	account := &Account{}
+    if err := json.Unmarshal(responseBody, &account); err != nil {
+        panic(err)
+    }
 	body := "Hi " + html.EscapeString(account.Email)
 	w.Write([]byte(body))
 }
