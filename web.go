@@ -45,7 +45,7 @@ func handleAuth(w http.ResponseWriter, r *http.Request) {
 
 func handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	code := r.FormValue("code")
-	transport := &oauth.Transport{oauth.Config: oauthConfig}
+	transport := &oauth.Transport{Config: oauthConfig}
 	token, err := transport.Exchange(code)
 	if err != nil {
 		panic(err)
