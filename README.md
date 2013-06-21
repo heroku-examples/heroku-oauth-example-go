@@ -2,7 +2,7 @@
 
 Example Go application that uses the Heroku OAuth web flow for authentication.
 
-The [OAuth developer documentation](https://devcenter.heroku.com/articles/oauth) has additional resources.
+The [OAuth developer documentation](https://devcenter.heroku.com/articles/oauth?preview=1) has additional resources.
 
 ## Local Installation
 
