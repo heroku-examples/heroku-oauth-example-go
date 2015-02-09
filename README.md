@@ -24,7 +24,7 @@ $ open http://localhost:5000
 ```
 $ heroku create oauth-example-go-$USER
 $ heroku plugins:install https://github.com/heroku/heroku-oauth.git
-$ heroku clients:create -s "Go OAuth Example ($USER)" https://oauth-example-go-$USER.herokuapp.com
+$ heroku clients:create -s "Go OAuth Example ($USER)" https://oauth-example-go-$USER.herokuapp.com -b https://github.com/kr/heroku-buildpack-go.git
 $ heroku config:add HEROKU_OAUTH_ID=     # set to `id` from command output above
 $ heroku config:add HEROKU_OAUTH_SECRET= # set to `secret` from command output above
 $ heroku config:add COOKIE_SECRET=`dd if=/dev/urandom bs=32 count=1 2>/dev/null | openssl base64`
