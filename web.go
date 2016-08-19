@@ -3,10 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"html"
+	"fmt"
 	"io/ioutil"
 	"net/http"
-	"fmt"
 	"os"
 
 	"github.com/gorilla/securecookie"
@@ -36,7 +35,7 @@ var (
 func main() {
 	stateToken = os.Getenv("OAUTH_STATE_TOKEN")
 	if stateToken == "" {
-		stateToken = string(securecookie.GenerateRandomKey())
+		stateToken = string(securecookie.GenerateRandomKey(32))
 	}
 
 	http.HandleFunc("/", handleRoot)
@@ -82,18 +81,18 @@ func handleUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	token, ok := session.Values["heroku-oauth-token"].(*oath.Token)
+	token, ok := session.Values["heroku-oauth-token"].(*oauth2.Token)
 	if !ok {
 		panic("Unable to assert token")
 	}
-	client := oauthConfig.Client(context.Backgound(), token)
+	client := oauthConfig.Client(context.Background(), token)
 	resp, err := client.Get("https://api.heroku.com/account")
 	if err != nil {
 		panic(err)
 	}
 	defer resp.Body.Close()
 	responseBody, err := ioutil.ReadAll(resp.Body)
-	var account
+	var account Account
 	if err := json.Unmarshal(responseBody, &account); err != nil {
 		panic(err)
 	}
