@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -20,7 +21,7 @@ type Account struct {
 }
 
 var (
-	store = sessions.NewCookieStore([]byte(os.Getenv("COOKIE_SECRET")))
+	store = sessions.NewCookieStore([]byte(os.Getenv("COOKIE_SECRET")), []byte(os.Getenv("COOKIE_ENCRYPT")))
 
 	oauthConfig = &oauth2.Config{
 		ClientID:     os.Getenv("HEROKU_OAUTH_ID"),
@@ -33,6 +34,11 @@ var (
 )
 
 func main() {
+	gob.Register(&oauth2.Token{})
+
+	store.MaxAge(60 * 60 * 8)
+	store.Options.Secure = true
+
 	stateToken = os.Getenv("OAUTH_STATE_TOKEN")
 	if stateToken == "" {
 		stateToken = string(securecookie.GenerateRandomKey(32))
