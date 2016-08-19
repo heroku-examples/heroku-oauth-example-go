@@ -42,7 +42,7 @@ func main() {
 	http.HandleFunc("/auth/heroku", handleAuth)
 	http.HandleFunc("/auth/heroku/callback", handleAuthCallback)
 	http.HandleFunc("/user", handleUser)
-	http.ListenAndServe(":5000", nil)
+	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
