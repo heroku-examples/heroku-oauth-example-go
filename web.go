@@ -1,13 +1,18 @@
 package main
 
 import (
-	"code.google.com/p/goauth2/oauth"
+	"context"
 	"encoding/json"
-	"github.com/gorilla/sessions"
 	"html"
 	"io/ioutil"
 	"net/http"
+	"fmt"
 	"os"
+
+	"github.com/gorilla/securecookie"
+	"github.com/gorilla/sessions"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/heroku"
 )
 
 // Account representation.
@@ -15,17 +20,25 @@ type Account struct {
 	Email string `json:"email"`
 }
 
-var store = sessions.NewCookieStore([]byte(os.Getenv("COOKIE_SECRET")))
+var (
+	store = sessions.NewCookieStore([]byte(os.Getenv("COOKIE_SECRET")))
 
-var oauthConfig = &oauth.Config{
-	ClientId:     os.Getenv("HEROKU_OAUTH_ID"),
-	ClientSecret: os.Getenv("HEROKU_OAUTH_SECRET"),
-	AuthURL:      "https://id.heroku.com/oauth/authorize",
-	TokenURL:     "https://id.heroku.com/oauth/token",
-	RedirectURL:  "http://localhost:5000/heroku/auth/callback",
-}
+	oauthConfig = &oauth2.Config{
+		ClientID:     os.Getenv("HEROKU_OAUTH_ID"),
+		ClientSecret: os.Getenv("HEROKU_OAUTH_SECRET"),
+		Endpoint:     heroku.Endpoint,
+		RedirectURL:  "http://" + os.Getenv("HEROKU_APP_NAME") + "herokuapp.com/auth/heroku/callback",
+	}
+
+	stateToken string
+)
 
 func main() {
+	stateToken = os.Getenv("OAUTH_STATE_TOKEN")
+	if stateToken == "" {
+		stateToken = string(securecookie.GenerateRandomKey())
+	}
+
 	http.HandleFunc("/", handleRoot)
 	http.HandleFunc("/auth/heroku", handleAuth)
 	http.HandleFunc("/auth/heroku/callback", handleAuthCallback)
@@ -34,28 +47,33 @@ func main() {
 }
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
-	body := `<a href="/auth/heroku">Sign in with Heroku</a>`
-	w.Write([]byte(body))
+	fmt.Fprint(w, `<html><body><a href="/auth/heroku">Sign in with Heroku</a></body></html>`)
 }
 
 func handleAuth(w http.ResponseWriter, r *http.Request) {
-	url := oauthConfig.AuthCodeURL("")
+	url := oauthConfig.AuthCodeURL(stateToken)
 	http.Redirect(w, r, url, http.StatusFound)
 }
 
 func handleAuthCallback(w http.ResponseWriter, r *http.Request) {
-	code := r.FormValue("code")
-	transport := &oauth.Transport{Config: oauthConfig}
-	token, err := transport.Exchange(code)
+	if v := r.FormValue("state"); v != stateToken {
+		// TODO: Handle invalid state token
+		panic("Wrong state token")
+	}
+	ctx := context.Background()
+	token, err := oauthConfig.Exchange(ctx, r.FormValue("code"))
 	if err != nil {
+		// TODO: Handle err
 		panic(err)
 	}
 	session, err := store.Get(r, "heroku-oauth-example-go")
 	if err != nil {
 		panic(err)
 	}
-	session.Values["heroku-oauth-token"] = token.AccessToken
-	session.Save(r, w)
+	session.Values["heroku-oauth-token"] = token
+	if err := session.Save(r, w); err != nil {
+		panic(err)
+	}
 	http.Redirect(w, r, "/user", http.StatusFound)
 }
 
@@ -64,17 +82,20 @@ func handleUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	herokuOauthToken := session.Values["heroku-oauth-token"].(string)
-	resp, err := http.Get("https://:" + herokuOauthToken + "@api.heroku.com/account")
+	token, ok := session.Values["heroku-oauth-token"].(*oath.Token)
+	if !ok {
+		panic("Unable to assert token")
+	}
+	client := oauthConfig.Client(context.Backgound(), token)
+	resp, err := client.Get("https://api.heroku.com/account")
 	if err != nil {
 		panic(err)
 	}
 	defer resp.Body.Close()
 	responseBody, err := ioutil.ReadAll(resp.Body)
-	account := &Account{}
+	var account
 	if err := json.Unmarshal(responseBody, &account); err != nil {
 		panic(err)
 	}
-	body := "Hi " + html.EscapeString(account.Email)
-	w.Write([]byte(body))
+	fmt.Fprintf(w, `<html><body><h1>Hello %s</h1></body></html>`, account.Email)
 }
