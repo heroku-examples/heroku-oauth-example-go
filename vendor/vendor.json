@@ -21,6 +21,12 @@
 			"revisionTime": "2016-08-16T18:50:42Z"
 		},
 		{
+			"checksumSHA1": "9jjO5GjLa0XF/nfWihF02RoH4qc=",
+			"path": "golang.org/x/net/context",
+			"revision": "07b51741c1d6423d4a6abab1c49940ec09cb1aaf",
+			"revisionTime": "2016-08-11T10:50:59Z"
+		},
+		{
 			"checksumSHA1": "yNdgWHw0jfiNAO9E7IfrbyiuKVc=",
 			"path": "golang.org/x/oauth2",
 			"revision": "dfd8ac9ce03f17d8f65850950f1ef12bd55f3e97",
@@ -29,6 +35,12 @@
 		{
 			"checksumSHA1": "IxKrE4DsLB4HBUD3HxHXrf89aZE=",
 			"path": "golang.org/x/oauth2/heroku",
+			"revision": "dfd8ac9ce03f17d8f65850950f1ef12bd55f3e97",
+			"revisionTime": "2016-08-19T21:41:51Z"
+		},
+		{
+			"checksumSHA1": "D3v/aqfB9swlaZcSksCoF+lbOqo=",
+			"path": "golang.org/x/oauth2/internal",
 			"revision": "dfd8ac9ce03f17d8f65850950f1ef12bd55f3e97",
 			"revisionTime": "2016-08-19T21:41:51Z"
 		}
