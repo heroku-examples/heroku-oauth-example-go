@@ -1,1 +1,1 @@
-web: ./heroku-oauth-example-go
+web: heroku-oauth-example-go
