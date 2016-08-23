@@ -27,23 +27,23 @@
 			"revisionTime": "2016-08-11T10:50:59Z"
 		},
 		{
-			"checksumSHA1": "yNdgWHw0jfiNAO9E7IfrbyiuKVc=",
+			"checksumSHA1": "4q+J7KldqFG28gkuEdHTyHgNcz4=",
 			"path": "golang.org/x/oauth2",
-			"revision": "dfd8ac9ce03f17d8f65850950f1ef12bd55f3e97",
+			"revision": "54f42edba4a8f81d48dc8b2287b7c7421e673022",
 			"revisionTime": "2016-08-19T21:41:51Z"
 		},
 		{
 			"checksumSHA1": "IxKrE4DsLB4HBUD3HxHXrf89aZE=",
 			"path": "golang.org/x/oauth2/heroku",
-			"revision": "dfd8ac9ce03f17d8f65850950f1ef12bd55f3e97",
+			"revision": "54f42edba4a8f81d48dc8b2287b7c7421e673022",
 			"revisionTime": "2016-08-19T21:41:51Z"
 		},
 		{
 			"checksumSHA1": "D3v/aqfB9swlaZcSksCoF+lbOqo=",
 			"path": "golang.org/x/oauth2/internal",
-			"revision": "dfd8ac9ce03f17d8f65850950f1ef12bd55f3e97",
+			"revision": "54f42edba4a8f81d48dc8b2287b7c7421e673022",
 			"revisionTime": "2016-08-19T21:41:51Z"
 		}
 	],
-	"rootPath": "github.com/heroku/heroku-oauth-example-go"
+	"rootPath": "github.com/heroku-examples/heroku-oauth-example-go"
 }
