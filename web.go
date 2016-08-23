@@ -14,11 +14,6 @@ import (
 	"golang.org/x/oauth2/heroku"
 )
 
-// Account representation.
-type Account struct {
-	Email string `json:"email"`
-}
-
 var (
 	store = sessions.NewCookieStore([]byte(os.Getenv("COOKIE_SECRET")), []byte(os.Getenv("COOKIE_ENCRYPT")))
 
@@ -92,7 +87,9 @@ func handleUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 	d := json.NewDecoder(resp.Body)
-	var account Account
+	var account struct { // See https://devcenter.heroku.com/articles/platform-api-reference#account
+		Email string `json:"email"`
+	}
 	if err := d.Decode(&account); err != nil {
 		panic(err)
 	}
