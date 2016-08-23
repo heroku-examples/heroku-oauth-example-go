@@ -24,7 +24,7 @@ var (
 		RedirectURL:  "http://" + os.Getenv("HEROKU_APP_NAME") + "herokuapp.com/auth/heroku/callback", // See https://devcenter.heroku.com/articles/dyno-metadata
 	}
 
-	stateToken = os.Getenv("OAUTH_STATE_TOKEN")
+	stateToken = os.Getenv("HEROKU_APP_NAME")
 )
 
 func init() {
@@ -32,10 +32,6 @@ func init() {
 
 	store.MaxAge(60 * 60 * 8)
 	store.Options.Secure = true
-
-	if stateToken == "" {
-		stateToken = os.Getenv("HEROKU_APP_NAME")
-	}
 }
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
