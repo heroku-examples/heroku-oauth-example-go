@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/heroku"
@@ -25,7 +24,7 @@ var (
 		RedirectURL:  "http://" + os.Getenv("HEROKU_APP_NAME") + "herokuapp.com/auth/heroku/callback", // See https://devcenter.heroku.com/articles/dyno-metadata
 	}
 
-	stateToken string
+	stateToken = os.Getenv("OAUTH_STATE_TOKEN")
 )
 
 func init() {
@@ -34,9 +33,8 @@ func init() {
 	store.MaxAge(60 * 60 * 8)
 	store.Options.Secure = true
 
-	stateToken = os.Getenv("OAUTH_STATE_TOKEN")
 	if stateToken == "" {
-		stateToken = string(securecookie.GenerateRandomKey(32))
+		stateToken = os.Getenv("HEROKU_APP_NAME")
 	}
 }
 
