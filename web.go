@@ -5,7 +5,6 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -27,14 +26,14 @@ var (
 		ClientID:     os.Getenv("HEROKU_OAUTH_ID"),
 		ClientSecret: os.Getenv("HEROKU_OAUTH_SECRET"),
 		Endpoint:     heroku.Endpoint,
-		Scopes:       []string{"identity"},
-		RedirectURL:  "http://" + os.Getenv("HEROKU_APP_NAME") + "herokuapp.com/auth/heroku/callback",
+		Scopes:       []string{"identity"},                                                            // See https://devcenter.heroku.com/articles/oauth#scopes
+		RedirectURL:  "http://" + os.Getenv("HEROKU_APP_NAME") + "herokuapp.com/auth/heroku/callback", // See https://devcenter.heroku.com/articles/dyno-metadata
 	}
 
 	stateToken string
 )
 
-func main() {
+func init() {
 	gob.Register(&oauth2.Token{})
 
 	store.MaxAge(60 * 60 * 8)
@@ -44,12 +43,6 @@ func main() {
 	if stateToken == "" {
 		stateToken = string(securecookie.GenerateRandomKey(32))
 	}
-
-	http.HandleFunc("/", handleRoot)
-	http.HandleFunc("/auth/heroku", handleAuth)
-	http.HandleFunc("/auth/heroku/callback", handleAuthCallback)
-	http.HandleFunc("/user", handleUser)
-	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
@@ -98,10 +91,18 @@ func handleUser(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	responseBody, err := ioutil.ReadAll(resp.Body)
+	d := json.NewDecoder(resp.Body)
 	var account Account
-	if err := json.Unmarshal(responseBody, &account); err != nil {
+	if err := d.Decode(&account); err != nil {
 		panic(err)
 	}
 	fmt.Fprintf(w, `<html><body><h1>Hello %s</h1></body></html>`, account.Email)
+}
+
+func main() {
+	http.HandleFunc("/", handleRoot)
+	http.HandleFunc("/auth/heroku", handleAuth)
+	http.HandleFunc("/auth/heroku/callback", handleAuthCallback)
+	http.HandleFunc("/user", handleUser)
+	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }
