@@ -45,22 +45,24 @@ func handleAuth(w http.ResponseWriter, r *http.Request) {
 
 func handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	if v := r.FormValue("state"); v != stateToken {
-		// TODO: Handle invalid state token
-		panic("Wrong state token")
+		http.Error(w, "Invalid State token", http.StatusBadRequest)
+		return
 	}
 	ctx := context.Background()
 	token, err := oauthConfig.Exchange(ctx, r.FormValue("code"))
 	if err != nil {
-		// TODO: Handle err
-		panic(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	session, err := store.Get(r, "heroku-oauth-example-go")
 	if err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	session.Values["heroku-oauth-token"] = token
 	if err := session.Save(r, w); err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	http.Redirect(w, r, "/user", http.StatusFound)
 }
@@ -68,16 +70,19 @@ func handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 func handleUser(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "heroku-oauth-example-go")
 	if err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	token, ok := session.Values["heroku-oauth-token"].(*oauth2.Token)
 	if !ok {
-		panic("Unable to assert token")
+		http.Error(w, "Unable to assert token", http.StatusInternalServerError)
+		return
 	}
 	client := oauthConfig.Client(context.Background(), token)
 	resp, err := client.Get("https://api.heroku.com/account")
 	if err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	defer resp.Body.Close()
 	d := json.NewDecoder(resp.Body)
@@ -85,7 +90,8 @@ func handleUser(w http.ResponseWriter, r *http.Request) {
 		Email string `json:"email"`
 	}
 	if err := d.Decode(&account); err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	fmt.Fprintf(w, `<html><body><h1>Hello %s</h1></body></html>`, account.Email)
 }
