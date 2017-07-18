@@ -79,7 +79,11 @@ func handleUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	client := oauthConfig.Client(context.Background(), token)
-	resp, err := client.Get("https://api.heroku.com/account")
+
+	req, _ := http.NewRequest("GET", "https://api.heroku.com/account", nil)
+	req.Header.Add("Accept", "application/vnd.heroku+json; version=3") // Add the correct headers for Heroku API version 3 -- see e.g. https://devcenter.heroku.com/articles/platform-api-reference#clients
+	resp, err := client.Do(req)
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
