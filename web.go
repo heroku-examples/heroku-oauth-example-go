@@ -2,20 +2,19 @@ package main
 
 import (
 	"context"
-	"encoding/gob"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 
-	"github.com/gorilla/sessions"
+	"log"
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/heroku"
 )
 
 var (
-	store = sessions.NewCookieStore([]byte(os.Getenv("COOKIE_SECRET")), []byte(os.Getenv("COOKIE_ENCRYPT")))
-
 	oauthConfig = &oauth2.Config{
 		ClientID:     os.Getenv("HEROKU_OAUTH_ID"),
 		ClientSecret: os.Getenv("HEROKU_OAUTH_SECRET"),
@@ -27,83 +26,70 @@ var (
 	stateToken = os.Getenv("HEROKU_APP_NAME")
 )
 
-func init() {
-	gob.Register(&oauth2.Token{})
-
-	store.MaxAge(60 * 60 * 8)
-	store.Options.Secure = true
-}
-
 func handleRoot(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, `<html><body><a href="/auth/heroku">Sign in with Heroku</a></body></html>`)
+	fmt.Fprint(w, `<html><body><a href="/auth/heroku">Florian Otel test for OAuth with Heroku</a></body></html>`)
 }
 
 func handleAuth(w http.ResponseWriter, r *http.Request) {
 	url := oauthConfig.AuthCodeURL(stateToken)
-	http.Redirect(w, r, url, http.StatusFound)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
 func handleAuthCallback(w http.ResponseWriter, r *http.Request) {
-	if v := r.FormValue("state"); v != stateToken {
-		http.Error(w, "Invalid State token", http.StatusBadRequest)
+	if state := r.FormValue("state"); state != stateToken {
+		log.Printf("invalid oauth state, expected '%s', got '%s'\n", stateToken, state)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		// http.Error(w, "Invalid State token", http.StatusBadRequest)
 		return
 	}
-	ctx := context.Background()
-	token, err := oauthConfig.Exchange(ctx, r.FormValue("code"))
+	token, err := oauthConfig.Exchange(oauth2.NoContext, r.FormValue("code"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Code exchange failed with error: '%s'\n", err)
+		// http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	session, err := store.Get(r, "heroku-oauth-example-go")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	session.Values["heroku-oauth-token"] = token
-	if err := session.Save(r, w); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	http.Redirect(w, r, "/user", http.StatusFound)
-}
 
-func handleUser(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, "heroku-oauth-example-go")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	token, ok := session.Values["heroku-oauth-token"].(*oauth2.Token)
-	if !ok {
-		http.Error(w, "Unable to assert token", http.StatusInternalServerError)
-		return
-	}
+	log.Printf("Received OAuth token: %#v", token)
+
+	//// Get Heroku user information using the acquired token
+
 	client := oauthConfig.Client(context.Background(), token)
-
 	req, _ := http.NewRequest("GET", "https://api.heroku.com/account", nil)
-	req.Header.Add("Accept", "application/vnd.heroku+json; version=3") // Add the correct headers for Heroku API version 3 -- see e.g. https://devcenter.heroku.com/articles/platform-api-reference#clients
+
+	// Add the correct headers for Heroku API version 3 -- see e.g. https://devcenter.heroku.com/articles/platform-api-reference#clients
+	req.Header.Add("Accept", "application/vnd.heroku+json; version=3")
 	resp, err := client.Do(req)
 
 	if err != nil {
+		log.Printf("Error fetching Heroku account information: '%s'\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	log.Printf("===> Response Status: %s", resp.Status)
+	log.Printf("===> Response Headers: %s", resp.Header)
+
+	body, _ := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
-	d := json.NewDecoder(resp.Body)
+
+	log.Printf("===> Response Body: %s", string(body))
+	defer resp.Body.Close()
+
 	var account struct { // See https://devcenter.heroku.com/articles/platform-api-reference#account
 		Email string `json:"email"`
+		Name  string `json:"name"`
 	}
-	if err := d.Decode(&account); err != nil {
+
+	if err := json.Unmarshal(body, &account); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintf(w, `<html><body><h1>Hello %s</h1></body></html>`, account.Email)
+	fmt.Fprintf(w, `<html><body><h1>Hello %s, your Email is: %s</h1></body></html>`, account.Name, account.Email)
 }
 
 func main() {
 	http.HandleFunc("/", handleRoot)
 	http.HandleFunc("/auth/heroku", handleAuth)
 	http.HandleFunc("/auth/heroku/callback", handleAuthCallback)
-	http.HandleFunc("/user", handleUser)
 	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }
