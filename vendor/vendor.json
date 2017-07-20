@@ -3,6 +3,129 @@
 	"ignore": "test solaris appengine",
 	"package": [
 		{
+			"path": "bufio",
+			"revision": ""
+		},
+		{
+			"path": "bytes",
+			"revision": ""
+		},
+		{
+			"path": "context",
+			"revision": ""
+		},
+		{
+			"path": "crypto",
+			"revision": ""
+		},
+		{
+			"path": "crypto/aes",
+			"revision": ""
+		},
+		{
+			"path": "crypto/cipher",
+			"revision": ""
+		},
+		{
+			"path": "crypto/ecdsa",
+			"revision": ""
+		},
+		{
+			"path": "crypto/elliptic",
+			"revision": ""
+		},
+		{
+			"path": "crypto/hmac",
+			"revision": ""
+		},
+		{
+			"path": "crypto/rand",
+			"revision": ""
+		},
+		{
+			"path": "crypto/rsa",
+			"revision": ""
+		},
+		{
+			"path": "crypto/sha256",
+			"revision": ""
+		},
+		{
+			"path": "crypto/sha512",
+			"revision": ""
+		},
+		{
+			"path": "crypto/subtle",
+			"revision": ""
+		},
+		{
+			"path": "crypto/tls",
+			"revision": ""
+		},
+		{
+			"path": "crypto/x509",
+			"revision": ""
+		},
+		{
+			"path": "crypto/x509/pkix",
+			"revision": ""
+		},
+		{
+			"path": "encoding",
+			"revision": ""
+		},
+		{
+			"path": "encoding/base32",
+			"revision": ""
+		},
+		{
+			"path": "encoding/base64",
+			"revision": ""
+		},
+		{
+			"path": "encoding/binary",
+			"revision": ""
+		},
+		{
+			"path": "encoding/gob",
+			"revision": ""
+		},
+		{
+			"path": "encoding/hex",
+			"revision": ""
+		},
+		{
+			"path": "encoding/json",
+			"revision": ""
+		},
+		{
+			"path": "encoding/pem",
+			"revision": ""
+		},
+		{
+			"path": "encoding/xml",
+			"revision": ""
+		},
+		{
+			"path": "errors",
+			"revision": ""
+		},
+		{
+			"path": "fmt",
+			"revision": ""
+		},
+		{
+			"path": "github.com/FlorianOtel/heroku-oauth-example-go",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "RBCEqLDUmpNzNzVx2hkl3xMfcOI=",
+			"path": "github.com/cyberdelia/heroku-go/v3",
+			"revision": "3473c6d4752ef1da78184d6a55d5f20c7ca72b18",
+			"revisionTime": "2017-07-09T18:08:13Z",
+			"tree": true
+		},
+		{
 			"checksumSHA1": "7c3FuEadBInl/4ExSrB7iJMXpe4=",
 			"path": "github.com/dustin/go-broadcast",
 			"revision": "3bdf6d4a7164a50bc19d5f230e2981d87d2584f1",
@@ -32,6 +155,12 @@
 			"path": "github.com/golang/protobuf/proto",
 			"revision": "0a4f71a498b7c4812f64969510bcb4eca251e33a",
 			"revisionTime": "2017-07-12T04:22:13Z"
+		},
+		{
+			"checksumSHA1": "p3IB18uJRs4dL2K5yx24MrLYE9A=",
+			"path": "github.com/google/go-querystring/query",
+			"revision": "53e6ce116135b80d037921a7fdd5138cf32d7a8a",
+			"revisionTime": "2017-01-11T10:11:55Z"
 		},
 		{
 			"checksumSHA1": "g/V4qrXjUGG9B+e3hB+4NAYJ5Gs=",
@@ -70,6 +199,12 @@
 			"revisionTime": "2017-03-22T23:44:13Z"
 		},
 		{
+			"checksumSHA1": "Se195FlZ160eaEk/uVx4KdTPSxU=",
+			"path": "github.com/pborman/uuid",
+			"revision": "e790cca94e6cc75c7064b1332e63811d4aae1a53",
+			"revisionTime": "2017-06-12T15:36:48Z"
+		},
+		{
 			"checksumSHA1": "IopMW+arBezL5bqOfrVU6UEfn28=",
 			"path": "github.com/thinkerou/favicon",
 			"revision": "94a442a49da6e2d44bdd5e0d2e2e185c43a19d93",
@@ -80,6 +215,10 @@
 			"path": "github.com/ugorji/go/codec",
 			"revision": "5efa3251c7f7d05e5d9704a69a984ec9f1386a40",
 			"revisionTime": "2017-06-20T10:48:52Z"
+		},
+		{
+			"path": "go/format",
+			"revision": ""
 		},
 		{
 			"checksumSHA1": "Ag672Laei0E45NrvTO4LV9B3Jfc=",
@@ -108,8 +247,9 @@
 		{
 			"checksumSHA1": "IxKrE4DsLB4HBUD3HxHXrf89aZE=",
 			"path": "golang.org/x/oauth2/heroku",
-			"revision": "54f42edba4a8f81d48dc8b2287b7c7421e673022",
-			"revisionTime": "2016-08-19T21:41:51Z"
+			"revision": "b53b38ad8a6435bd399ea76d0fa74f23149cca4e",
+			"revisionTime": "2017-07-19T03:29:57Z",
+			"tree": true
 		},
 		{
 			"checksumSHA1": "D3v/aqfB9swlaZcSksCoF+lbOqo=",
@@ -128,6 +268,146 @@
 			"path": "gopkg.in/yaml.v2",
 			"revision": "3b4ad1db5b2a649883ff3782f5f9f6fb52be71af",
 			"revisionTime": "2017-07-13T20:15:20Z"
+		},
+		{
+			"path": "hash",
+			"revision": ""
+		},
+		{
+			"path": "html",
+			"revision": ""
+		},
+		{
+			"path": "html/template",
+			"revision": ""
+		},
+		{
+			"path": "io",
+			"revision": ""
+		},
+		{
+			"path": "io/ioutil",
+			"revision": ""
+		},
+		{
+			"path": "log",
+			"revision": ""
+		},
+		{
+			"path": "math",
+			"revision": ""
+		},
+		{
+			"path": "math/big",
+			"revision": ""
+		},
+		{
+			"path": "math/rand",
+			"revision": ""
+		},
+		{
+			"path": "mime",
+			"revision": ""
+		},
+		{
+			"path": "mime/multipart",
+			"revision": ""
+		},
+		{
+			"path": "net",
+			"revision": ""
+		},
+		{
+			"path": "net/http",
+			"revision": ""
+		},
+		{
+			"path": "net/http/httputil",
+			"revision": ""
+		},
+		{
+			"path": "net/rpc",
+			"revision": ""
+		},
+		{
+			"path": "net/url",
+			"revision": ""
+		},
+		{
+			"path": "os",
+			"revision": ""
+		},
+		{
+			"path": "os/signal",
+			"revision": ""
+		},
+		{
+			"path": "path",
+			"revision": ""
+		},
+		{
+			"path": "path/filepath",
+			"revision": ""
+		},
+		{
+			"path": "reflect",
+			"revision": ""
+		},
+		{
+			"path": "regexp",
+			"revision": ""
+		},
+		{
+			"path": "runtime",
+			"revision": ""
+		},
+		{
+			"path": "sort",
+			"revision": ""
+		},
+		{
+			"path": "strconv",
+			"revision": ""
+		},
+		{
+			"path": "strings",
+			"revision": ""
+		},
+		{
+			"path": "sync",
+			"revision": ""
+		},
+		{
+			"path": "sync/atomic",
+			"revision": ""
+		},
+		{
+			"path": "syscall",
+			"revision": ""
+		},
+		{
+			"path": "text/template",
+			"revision": ""
+		},
+		{
+			"path": "time",
+			"revision": ""
+		},
+		{
+			"path": "unicode",
+			"revision": ""
+		},
+		{
+			"path": "unicode/utf16",
+			"revision": ""
+		},
+		{
+			"path": "unicode/utf8",
+			"revision": ""
+		},
+		{
+			"path": "unsafe",
+			"revision": ""
 		}
 	],
 	"rootPath": "github.com/FlorianOtel/heroku-oauth-example-go"
