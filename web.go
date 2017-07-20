@@ -10,9 +10,22 @@ import (
 
 	"log"
 
+	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/heroku"
 )
+
+type myjson struct {
+	Id            string `json:"id"`
+	Issued_at     string `json:"issued_at"`
+	Scope         string `json:"scope"`
+	Instance_url  string `json:"instance_url"`
+	Token_type    string `json:"token_type"`
+	Refresh_token string `json:"refresh_token"`
+	Id_token      string `json:"id_token"`
+	Signature     string `json:"signature"`
+	Access_token  string `json:"access_token"`
+}
 
 var (
 	oauthConfig = &oauth2.Config{
@@ -24,16 +37,11 @@ var (
 	}
 
 	stateToken = os.Getenv("HEROKU_APP_NAME")
+
+	jsondata = myjson{Id: "My Id", Issued_at: "My Issued at", Scope: "My Scope", Instance_url: "My Instace_URL", Token_type: "My Token Type", Refresh_token: "My Refresh token", Id_token: "My ID token", Signature: "My Signature", Access_token: "My access token"}
+
+	authclient *http.Client // Pointer to the OAuth'ed http client
 )
-
-func handleRoot(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, `<html><body><a href="/auth/heroku">Florian Otel test for OAuth with Heroku</a></body></html>`)
-}
-
-func handleAuth(w http.ResponseWriter, r *http.Request) {
-	url := oauthConfig.AuthCodeURL(stateToken)
-	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-}
 
 func handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	if state := r.FormValue("state"); state != stateToken {
@@ -88,8 +96,68 @@ func handleAuthCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", handleRoot)
-	http.HandleFunc("/auth/heroku", handleAuth)
+
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		log.Fatal("$PORT must be set")
+	}
+
+	router := gin.Default()
+	router.Use(gin.Logger())
+	router.LoadHTMLGlob("templates/*.tmpl.html")
+	router.Static("/static", "static")
+
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.tmpl.html", nil)
+	})
+
+	router.GET("/auth/heroku", func(c *gin.Context) {
+		oauthurl := oauthConfig.AuthCodeURL(stateToken)
+		c.Redirect(http.StatusPermanentRedirect, oauthurl)
+	})
+
+	router.GET("/auth/callback", func(c *gin.Context) {
+		state := c.Query("state") // shortcut for c.Request.URL.Query().Get("state")
+		if state != stateToken {
+			log.Printf("invalid oauth state, expected '%s', got '%s'\n", stateToken, state)
+			c.Redirect(http.StatusPermanentRedirect, "/")
+			return
+		}
+
+		token, err := oauthConfig.Exchange(oauth2.NoContext, c.Query("code"))
+		if err != nil {
+			log.Printf("Code exchange failed with error: '%s'\n", err)
+			return
+		}
+		log.Printf("Received OAuth token: %#v", token)
+
+		authclient = oauthConfig.Client(context.Background(), token) // Save the OAuth'ed http client
+
+		c.Redirect(http.StatusPermanentRedirect, "/home")
+		return
+	})
+
+	// Dispatcher page for Heroku API actions
+	router.GET("/home", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "home.tmpl.html", nil)
+	})
+
+	router.GET("/home/account", func(c *gin.Context) {
+
+		if authclient == nil { // Not OAuth'ed yet
+			// c.HTML(http.StatusOK, "emptyhome.tmpl.html", nil)
+			c.Redirect(http.StatusPermanentRedirect, "/")
+			return
+		}
+
+		// c.HTML(http.StatusOK, "emptyhome.tmpl.html", nil)
+		// c.String(http.StatusOK, fmt.Sprintf("Hello %s, Your account information is:\n\n", "bobo"))
+		c.IndentedJSON(http.StatusOK, jsondata)
+	})
+
+	//
+	router.Run(":" + port)
+
 	http.HandleFunc("/auth/heroku/callback", handleAuthCallback)
-	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }
