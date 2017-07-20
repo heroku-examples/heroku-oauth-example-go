@@ -142,6 +142,26 @@ func main() {
 		c.IndentedJSON(http.StatusOK, regions)
 	})
 
+	// Heroku execution stacks information
+	router.GET("/home/heroku/stacks", func(c *gin.Context) {
+		resp := hapitransaction(c, "https://api.heroku.com/stacks")
+
+		if resp == nil {
+			return
+		}
+		// https://devcenter.heroku.com/articles/platform-api-reference#stacks
+		var stacks []herokuV3api.Stack
+
+		if err := json.Unmarshal(resp, &stacks); err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		// c.HTML(http.StatusOK, "emptyhome.tmpl.html", nil)
+		// c.String(http.StatusOK, fmt.Sprintf("Hello %s, Your account information is:\n\n", "bobo"))
+		c.IndentedJSON(http.StatusOK, stacks)
+	})
+
 	//
 	router.Run(":" + port)
 
