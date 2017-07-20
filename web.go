@@ -83,35 +83,15 @@ func main() {
 
 	// Heroku user account information
 	router.GET("/home/heroku/account", func(c *gin.Context) {
-		if authclient == nil { // Not OAuth'ed yet
-			c.Redirect(http.StatusPermanentRedirect, "/")
+		resp := hapitransaction(c, "https://api.heroku.com/account")
+
+		if resp == nil {
 			return
 		}
-
 		// https://devcenter.heroku.com/articles/platform-api-reference#account
 		var account herokuV3api.Account
-		req, _ := http.NewRequest("GET", "https://api.heroku.com/account", nil)
 
-		// Add the correct headers for Heroku API version 3 -- see e.g. https://devcenter.heroku.com/articles/platform-api-reference#clients
-		req.Header.Add("Accept", "application/vnd.heroku+json; version=3")
-		resp, err := authclient.Do(req)
-
-		if err != nil {
-			log.Printf("Error fetching Heroku account information: '%s'\n", err)
-			c.String(http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		log.Printf("===> Response Status: %s", resp.Status)
-		log.Printf("===> Response Headers: %s", resp.Header)
-
-		body, _ := ioutil.ReadAll(resp.Body)
-		defer resp.Body.Close()
-
-		log.Printf("===> Response Body: %s", string(body))
-		defer resp.Body.Close()
-
-		if err := json.Unmarshal(body, &account); err != nil {
+		if err := json.Unmarshal(resp, &account); err != nil {
 			c.String(http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -123,35 +103,16 @@ func main() {
 
 	// Heroku user apps information
 	router.GET("/home/heroku/apps", func(c *gin.Context) {
-		if authclient == nil { // Not OAuth'ed yet
-			c.Redirect(http.StatusPermanentRedirect, "/")
+		resp := hapitransaction(c, "https://api.heroku.com/apps")
+
+		if resp == nil {
 			return
 		}
 
-		// https://devcenter.heroku.com/articles/platform-api-reference#account
+		// https://devcenter.heroku.com/articles/platform-api-reference#apps
 		var apps []herokuV3api.App
-		req, _ := http.NewRequest("GET", "https://api.heroku.com/apps", nil)
 
-		// Add the correct headers for Heroku API version 3 -- see e.g. https://devcenter.heroku.com/articles/platform-api-reference#clients
-		req.Header.Add("Accept", "application/vnd.heroku+json; version=3")
-		resp, err := authclient.Do(req)
-
-		if err != nil {
-			log.Printf("Error fetching Heroku account information: '%s'\n", err)
-			c.String(http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		log.Printf("===> Response Status: %s", resp.Status)
-		log.Printf("===> Response Headers: %s", resp.Header)
-
-		body, _ := ioutil.ReadAll(resp.Body)
-		defer resp.Body.Close()
-
-		log.Printf("===> Response Body: %s", string(body))
-		defer resp.Body.Close()
-
-		if err := json.Unmarshal(body, &apps); err != nil {
+		if err := json.Unmarshal(resp, &apps); err != nil {
 			c.String(http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -161,7 +122,58 @@ func main() {
 		c.IndentedJSON(http.StatusOK, apps)
 	})
 
+	// Heroku user enabled regions information
+	router.GET("/home/heroku/regions", func(c *gin.Context) {
+		resp := hapitransaction(c, "https://api.heroku.com/regions")
+
+		if resp == nil {
+			return
+		}
+		// https://devcenter.heroku.com/articles/platform-api-reference#regions
+		var regions []herokuV3api.Region
+
+		if err := json.Unmarshal(resp, &regions); err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		// c.HTML(http.StatusOK, "emptyhome.tmpl.html", nil)
+		// c.String(http.StatusOK, fmt.Sprintf("Hello %s, Your account information is:\n\n", "bobo"))
+		c.IndentedJSON(http.StatusOK, regions)
+	})
+
 	//
 	router.Run(":" + port)
+
+}
+
+// Low-level Heroku API v3 transaction
+func hapitransaction(c *gin.Context, url string) []byte {
+	if authclient == nil { // Not OAuth'ed yet
+		c.Redirect(http.StatusPermanentRedirect, "/")
+		return nil
+	}
+
+	req, _ := http.NewRequest("GET", url, nil)
+
+	// Add the correct headers for Heroku API version 3 -- see e.g. https://devcenter.heroku.com/articles/platform-api-reference#clients
+	req.Header.Add("Accept", "application/vnd.heroku+json; version=3")
+	resp, err := authclient.Do(req)
+
+	if err != nil {
+		log.Printf("Error fetching Heroku API information: '%s'\n", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return nil
+	}
+
+	log.Printf("===> Response Status: %s", resp.Status)
+	log.Printf("===> Response Headers: %s", resp.Header)
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+
+	log.Printf("===> Response Body: %s", string(body))
+
+	return body
 
 }
