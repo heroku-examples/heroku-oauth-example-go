@@ -77,8 +77,12 @@ func main() {
 		c.HTML(http.StatusOK, "home.tmpl.html", nil)
 	})
 
-	// Get Heroku user account information
-	router.GET("/home/account", func(c *gin.Context) {
+	////////
+	//////// Heroku API constructs supported
+	////////
+
+	// Heroku user account information
+	router.GET("/home/heroku/account", func(c *gin.Context) {
 		if authclient == nil { // Not OAuth'ed yet
 			c.Redirect(http.StatusPermanentRedirect, "/")
 			return
@@ -117,8 +121,47 @@ func main() {
 		c.IndentedJSON(http.StatusOK, account)
 	})
 
+	// Heroku user apps information
+	router.GET("/home/heroku/apps", func(c *gin.Context) {
+		if authclient == nil { // Not OAuth'ed yet
+			c.Redirect(http.StatusPermanentRedirect, "/")
+			return
+		}
+
+		// https://devcenter.heroku.com/articles/platform-api-reference#account
+		var apps []herokuV3api.App
+		req, _ := http.NewRequest("GET", "https://api.heroku.com/account", nil)
+
+		// Add the correct headers for Heroku API version 3 -- see e.g. https://devcenter.heroku.com/articles/platform-api-reference#clients
+		req.Header.Add("Accept", "application/vnd.heroku+json; version=3")
+		resp, err := authclient.Do(req)
+
+		if err != nil {
+			log.Printf("Error fetching Heroku account information: '%s'\n", err)
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		log.Printf("===> Response Status: %s", resp.Status)
+		log.Printf("===> Response Headers: %s", resp.Header)
+
+		body, _ := ioutil.ReadAll(resp.Body)
+		defer resp.Body.Close()
+
+		log.Printf("===> Response Body: %s", string(body))
+		defer resp.Body.Close()
+
+		if err := json.Unmarshal(body, &apps); err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		// c.HTML(http.StatusOK, "emptyhome.tmpl.html", nil)
+		// c.String(http.StatusOK, fmt.Sprintf("Hello %s, Your account information is:\n\n", "bobo"))
+		c.IndentedJSON(http.StatusOK, apps)
+	})
+
 	//
 	router.Run(":" + port)
 
-	// http.HandleFunc("/auth/heroku/callback", handleAuthCallback)
 }
