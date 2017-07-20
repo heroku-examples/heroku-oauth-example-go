@@ -118,6 +118,7 @@ func main() {
 	})
 
 	router.GET("/auth/callback", func(c *gin.Context) {
+		log.Print("===> Callback received")
 		state := c.Query("state") // shortcut for c.Request.URL.Query().Get("state")
 		if state != stateToken {
 			log.Printf("invalid oauth state, expected '%s', got '%s'\n", stateToken, state)
