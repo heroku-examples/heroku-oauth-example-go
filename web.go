@@ -20,7 +20,7 @@ var (
 		ClientID:     os.Getenv("HEROKU_OAUTH_ID"),
 		ClientSecret: os.Getenv("HEROKU_OAUTH_SECRET"),
 		Endpoint:     heroku.Endpoint,
-		Scopes:       []string{"identity"},                                                            // See https://devcenter.heroku.com/articles/oauth#scopes
+		Scopes:       []string{"global"},                                                              // See https://devcenter.heroku.com/articles/oauth#scopes
 		RedirectURL:  "http://" + os.Getenv("HEROKU_APP_NAME") + "herokuapp.com/auth/heroku/callback", // See https://devcenter.heroku.com/articles/dyno-metadata
 	}
 
