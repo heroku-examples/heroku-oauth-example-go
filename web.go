@@ -159,5 +159,5 @@ func main() {
 	//
 	router.Run(":" + port)
 
-	http.HandleFunc("/auth/heroku/callback", handleAuthCallback)
+	// http.HandleFunc("/auth/heroku/callback", handleAuthCallback)
 }
