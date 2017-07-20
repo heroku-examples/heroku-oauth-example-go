@@ -130,7 +130,7 @@ func main() {
 
 		// https://devcenter.heroku.com/articles/platform-api-reference#account
 		var apps []herokuV3api.App
-		req, _ := http.NewRequest("GET", "https://api.heroku.com/account", nil)
+		req, _ := http.NewRequest("GET", "https://api.heroku.com/apps", nil)
 
 		// Add the correct headers for Heroku API version 3 -- see e.g. https://devcenter.heroku.com/articles/platform-api-reference#clients
 		req.Header.Add("Accept", "application/vnd.heroku+json; version=3")
