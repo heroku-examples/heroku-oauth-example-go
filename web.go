@@ -117,8 +117,7 @@ func main() {
 		c.Redirect(http.StatusPermanentRedirect, oauthurl)
 	})
 
-	router.GET("/auth/callback", func(c *gin.Context) {
-		log.Print("===> Callback received")
+	router.GET("/auth/heroku/callback", func(c *gin.Context) {
 		state := c.Query("state") // shortcut for c.Request.URL.Query().Get("state")
 		if state != stateToken {
 			log.Printf("invalid oauth state, expected '%s', got '%s'\n", stateToken, state)
