@@ -21,8 +21,8 @@ var (
 		ClientID:     os.Getenv("HEROKU_OAUTH_ID"),
 		ClientSecret: os.Getenv("HEROKU_OAUTH_SECRET"),
 		Endpoint:     heroku.Endpoint,
-		Scopes:       []string{"read"},                                                                // See https://devcenter.heroku.com/articles/oauth#scopes
-		RedirectURL:  "http://" + os.Getenv("HEROKU_APP_NAME") + "herokuapp.com/auth/heroku/callback", // See https://devcenter.heroku.com/articles/dyno-metadata
+		Scopes:       []string{"read"},                                                         // See https://devcenter.heroku.com/articles/oauth#scopes
+		RedirectURL:  "http://" + os.Getenv("HEROKU_APP_NAME") + "herokuapp.com/auth/callback", // See https://devcenter.heroku.com/articles/dyno-metadata
 	}
 
 	stateToken = os.Getenv("HEROKU_APP_NAME")
@@ -52,7 +52,7 @@ func main() {
 		c.Redirect(http.StatusPermanentRedirect, oauthurl)
 	})
 
-	router.GET("/auth/heroku/callback", func(c *gin.Context) {
+	router.GET("/auth/callback", func(c *gin.Context) {
 		state := c.Query("state") // shortcut for c.Request.URL.Query().Get("state")
 		if state != stateToken {
 			log.Printf("invalid oauth state, expected '%s', got '%s'\n", stateToken, state)
@@ -143,25 +143,25 @@ func main() {
 		c.IndentedJSON(http.StatusOK, regions)
 	})
 
-		// Heroku execution stacks information
-		router.GET("/home/heroku/stacks", func(c *gin.Context) {
-			resp := hapitransaction(c, "https://api.heroku.com/stacks")
+	// Heroku execution stacks information
+	router.GET("/home/heroku/stacks", func(c *gin.Context) {
+		resp := hapitransaction(c, "https://api.heroku.com/stacks")
 
-			if resp == nil {
-				return
-			}
-			// https://devcenter.heroku.com/articles/platform-api-reference#stacks
-			var stacks []herokuV3api.Stack
+		if resp == nil {
+			return
+		}
+		// https://devcenter.heroku.com/articles/platform-api-reference#stacks
+		var stacks []herokuV3api.Stack
 
-			if err := json.Unmarshal(resp, &stacks); err != nil {
-				c.String(http.StatusInternalServerError, err.Error())
-				return
-			}
+		if err := json.Unmarshal(resp, &stacks); err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
 
-			// c.HTML(http.StatusOK, "emptyhome.tmpl.html", nil)
-			// c.String(http.StatusOK, fmt.Sprintf("Hello %s, Your account information is:\n\n", "bobo"))
-			c.IndentedJSON(http.StatusOK, stacks)
-		})
+		// c.HTML(http.StatusOK, "emptyhome.tmpl.html", nil)
+		// c.String(http.StatusOK, fmt.Sprintf("Hello %s, Your account information is:\n\n", "bobo"))
+		c.IndentedJSON(http.StatusOK, stacks)
+	})
 
 	////
 	////
