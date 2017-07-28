@@ -1,4 +1,4 @@
-# Heroku OAuth Example: Go
+# Heroku OAuth Example 2017-07-28
 
 Example Go application that uses the Heroku OAuth web flow for authentication.
 
