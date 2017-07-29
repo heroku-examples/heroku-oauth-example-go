@@ -1,0 +1,21 @@
+{
+  "name": "heroku-oauth-example-go",
+  "scripts": {
+  },
+  "env": {
+    "HEROKU_OAUTH_ID": {
+      "required": true
+    },
+    "HEROKU_OAUTH_SECRET": {
+      "required": true
+    }
+  },
+  "formation": {
+  },
+  "addons": [
+
+  ],
+  "buildpacks": [
+
+  ]
+}
