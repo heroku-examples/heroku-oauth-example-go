@@ -1,0 +1,36 @@
+
+<!-- saved from url=(0098)file:///Users/fotel/Go/src/github.com/FlorianOtel/heroku-oauth-example-go/templates/home.tmpl.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"></head><body>{{template "header.tmpl.html"}}
+
+  {{template "nav.tmpl.html"}}
+
+<div class="jumbotron text-center">
+  <div class="container">
+    
+    <h1>Florian's Heroku demo app</h1>
+      <p>This demo application showcases authenticating against Heroku with OAuth and a few authenticated Heroku API constructs</p>
+      
+      
+  </div>
+</div>
+<div class="container">
+  
+  <hr>
+  <div class="row">
+    <div class="col-md-6">
+      <h3> <span class="glyphicon glyphicon-info-sign"></span><b>v2 Improved:</b> Supported Heroku API constructs</h3>
+      <ul>
+          <li><a href="/home/heroku/account">Heroku Account details</a>.</li>
+          <li><a href="/home/heroku/apps">Heroku Application list</a>.</li>
+	  <li><a href="/home/heroku/regions">Heroku Region list</a>.</li>
+	  <li><a href="/home/heroku/stacks">Heroku Execution stacks (underlying OS)</a>.</li>
+      </ul>
+    </div>
+    
+  </div> <!-- row -->
+    
+</div>
+
+
+
+</body></html>
